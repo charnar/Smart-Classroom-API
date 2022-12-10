@@ -1,0 +1,29 @@
+from fastapi import FastAPI, Request
+from fastapi import templating
+from fastapi.responses import StreamingResponse
+from fastapi.templating import Jinja2Templates
+from app.detection import DetectionAPI
+
+app = FastAPI()
+templates = Jinja2Templates(directory='templates')
+
+def generate(camera):
+    while True:
+        frame, processed_flag = camera.get_frame()
+
+        if processed_flag:
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg \r\n\r\n' + frame + b'\r\n\r\n'
+                )
+
+@app.get("/")
+def test(request: Request):
+    print('rendering template!')
+    return templates.TemplateResponse("index.html", {"request" : request})
+
+@app.get('/samplefootage/{footage_id}')
+def video_feed(footage_id):
+    
+    path = f'sample-footage/{footage_id}.mp4'
+    return StreamingResponse(generate(DetectionAPI(path)), media_type='multipart/x-mixed-replace;boundary=frame')
+

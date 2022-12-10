@@ -1,13 +1,17 @@
 import cv2
 import time
 import numpy as np
+import datetime
 from app.configs import CONFIG_PATH, WEIGHTS_PATH, SCALE_FACTOR, SPATIAL_SIZE, CONFIDENCE, THRESHOLD
+import app.utills as utills
 
 
 class DetectionAPI(object):
     def __init__(self, video_source):
         self.video = cv2.VideoCapture(video_source)
         self.net_yl = cv2.dnn.readNetFromDarknet(CONFIG_PATH, WEIGHTS_PATH)
+        self.net_yl.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+        self.net_yl.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
         self.ln = self.net_yl.getLayerNames()
         self.ln1 = [self.ln[i - 1] for i in self.net_yl.getUnconnectedOutLayers()]
         np.random.seed(42)
@@ -15,7 +19,9 @@ class DetectionAPI(object):
     def __del__(self):
         self.video.release()
 
+
     def get_frame(self):
+        self.processed = False
         success, image = self.video.read()
 
         # Apply Human Detection 
@@ -58,9 +64,14 @@ class DetectionAPI(object):
                 color = (0, 255, 0)
                 cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
 
-
         # Encode the image
+        self.processed = True
+
         response, encodedImage = cv2.imencode('.jpg', image)
-        return encodedImage.tobytes()
-        
-        
+        return encodedImage, self.processed
+
+
+    def frame_skip(self):
+        success, image = self.video.read()
+
+

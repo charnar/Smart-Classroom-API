@@ -21,5 +21,3 @@ coverage.xml
 .pytest_cache
 .hypothesis
 .idea
-sample-footage
-weights
