@@ -26,13 +26,17 @@ async def demo_connection(websocket: WebSocket, footage_id):
         detection.pre_process()
 
         previous_time = utills.get_utc_time()
-
+        count = 0
         # Main loop
+
         while True:
-            success = detection.frame_skip()
-            if not success:
-                break
-        
+            if (count <= detection.fps * FRAME_TIME_DELAY):
+                success = detection.frame_skip()
+                if not success:
+                    break
+
+                count += 1
+
             current_time = utills.get_utc_time()
             if current_time >= previous_time + FRAME_TIME_DELAY:
                 buffer, buffer_bird, all_person_points, classified_distances, seats = detection.get_frame()
@@ -53,6 +57,7 @@ async def demo_connection(websocket: WebSocket, footage_id):
                 }
 
                 previous_time = current_time
+                count = 0
                 await websocket.send_text(json.dumps(payload))
         
     except WebSocketDisconnect:
