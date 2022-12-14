@@ -1,4 +1,7 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from app.detection import DetectionAPI
 from app.configs import FRAME_TIME_DELAY
 import time
@@ -8,6 +11,14 @@ import yaml
 import json
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory='templates')
+
+
+@app.get("/")
+async def main_page(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.websocket("/demo/{footage_id}")
