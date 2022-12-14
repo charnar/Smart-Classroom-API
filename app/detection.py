@@ -38,7 +38,6 @@ class DetectionAPI(object):
         if success:
             transformed_first_frame = utills.perspective_transform_frame(image, self.pers_points)
             self.seat_matrix = get_seat_matrix(transformed_first_frame)
-            cv2.imwrite('out/reference_img.jpg', transformed_first_frame)
 
         # Transform seat points 
         utills.get_transformed_seat_points(self.seat_matrix, self.pers_transform)
@@ -70,7 +69,12 @@ class DetectionAPI(object):
 
         self.scale_w, self.scale_h = utills.get_scale(self.width, self.height, self.bird_width, self.bird_height)
 
+
+    def reset_seats(self):
+        for seat in self.seat_matrix:
+            seat.status = 0 
                     
+
     def get_frame(self):
         success, image = self.video.read()
         frameHeight, frameWidth = image.shape[:2]

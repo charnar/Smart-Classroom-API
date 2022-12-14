@@ -68,15 +68,15 @@ def cal_dis(p1, p2, distance_w, distance_h):
     return int(np.sqrt(((dis_h)**2) + ((dis_w)**2)))
 
 
-def get_physical_position(width, height, cal_scale_w, cal_scale_h, scale_w, scale_h):
-    phy_w = round(int(width * scale_w) / cal_scale_w, 2)
+def get_physical_position(height, width, cal_scale_h, cal_scale_w, scale_h, scale_w):
     phy_h = round(int(height  * scale_h) / cal_scale_h, 2)
+    phy_w = round(int(width * scale_w) / cal_scale_w, 2)
     return (phy_h, phy_w)
 
 
-def get_window_position(width, height, scale_w, scale_h):
-    bird_w = int(width * scale_w)
+def get_window_position(height, width, scale_h, scale_w):
     bird_h = int(height * scale_h)
+    bird_w = int(width * scale_w)
 
     return (bird_h, bird_w)
 
@@ -213,17 +213,8 @@ def get_bird_eye_view(frame, distances_mat, bottom_points, scale_w, scale_h, ris
     blank_image = cv2.flip(blank_image, 1)
 
     blank_image = cv2.circle(blank_image, (int(0* scale_h),int(0 * scale_w)), 5, red, 10)
-    blank_image = cv2.putText(blank_image, "origin(0,0)",  (int(0 * scale_h)+30,int(0 * scale_w)+20),cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100, 100, 0), 2)
+    blank_image = cv2.putText(blank_image, "origin (0,0)",  (int(0 * scale_h)+30,int(0 * scale_w)+20),cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100, 100, 0), 2)
     
-    
-    #Plot Seat Coordinate
-    for s in seat_mat:
-        center_x, center_y = s.centerTransformed
-        phy_w, phy_h = get_physical_position(center_x, center_y, cal_scale_w, cal_scale_h, scale_w, scale_h)
-        temp = "({:.2f},{:.2f})".format(phy_h, phy_w)
-        s.physical_coords = (phy_h, phy_w)
-        blank_image = cv2.circle(blank_image, (int(center_x * scale_w), int(center_y * scale_h)), 5, black, 10)
-        blank_image = cv2.putText(blank_image, temp, (int(center_x * scale_w), int(center_y * scale_h)),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (100, 100, 0), 2)
 
     blank_image = cv2.flip(blank_image, 1)
     blank_image = cv2.rotate(blank_image, cv2.ROTATE_90_COUNTERCLOCKWISE)
@@ -239,6 +230,14 @@ def get_bird_eye_view(frame, distances_mat, bottom_points, scale_w, scale_h, ris
     cal_scale_h = win_h/room_h 
     cal_scale_w = win_w/room_w
     #######################################
+
+    for s in seat_mat:
+        center_x, center_y = s.centerTransformed
+        phy_h, phy_w = get_physical_position(center_y, center_x, cal_scale_h, cal_scale_w, scale_h, scale_w)
+        temp = "({:.2f},{:.2f})".format(phy_h, phy_w)
+        s.physical_coords = (phy_h, phy_w)
+        blank_image = cv2.circle(blank_image, (int(center_y * scale_h), int(center_x * scale_w)), 5, black, 10)
+        # blank_image = cv2.putText(blank_image, temp, (int(center_y * scale_h), int(center_x * scale_w)),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (100, 100, 0), 2)
     
     
     for i in range(len(distances_mat)):
@@ -276,31 +275,27 @@ def get_bird_eye_view(frame, distances_mat, bottom_points, scale_w, scale_h, ris
     #Fixed Physical Coordinate#
     for index, i in enumerate(bottom_points):
         blank_image = cv2.circle(blank_image, (int(i[1] * scale_h),int(i[0]  * scale_w)), 5, green, 10)
-        phy_coordinates = get_physical_position(i[0], i[1], cal_scale_w, cal_scale_h, scale_w, scale_h)
+        phy_coordinates = get_physical_position(i[1], i[0], cal_scale_h, cal_scale_w, scale_h, scale_w)
         phy_h, phy_w = phy_coordinates
 
-        bird_coordinates = get_window_position(i[0], i[1], scale_w, scale_h)
+        bird_coordinates = get_window_position(i[1], i[0], scale_h, scale_w)
         bird_h, bird_w = bird_coordinates
+
 
         persons.append({'bird-eye-points' : bird_coordinates, 'physical-points' : phy_coordinates})
         
     for i in y:
         blank_image = cv2.circle(blank_image, (int(i[1] * scale_h),int(i[0]  * scale_w)), 5, yellow, 10)
-        phy_w, phy_h = get_physical_position(i[0], i[1], cal_scale_w, cal_scale_h, scale_w, scale_h)
 
 
     for i in r:
         blank_image = cv2.circle(blank_image, (int(i[1] * scale_h),int(i[0]  * scale_w)), 5, red, 10)
-        phy_w, phy_h = get_physical_position(i[0], i[1], cal_scale_w, cal_scale_h, scale_w, scale_h)
-
     
     
     blank_image = cv2.rotate(blank_image, cv2.ROTATE_90_CLOCKWISE)
     blank_image = cv2.flip(blank_image, 1)
     
-
     return blank_image, persons, (safe_pair, low_risk_pair, high_risk_pair)
-
 
 
 

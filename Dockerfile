@@ -10,6 +10,12 @@ COPY ./app /code/app
 
 COPY ./weights /code/weights
 
+COPY ./templates /code/templates
+
+COPY ./static /code/static
+
+COPY ./out /code/out
+
 COPY ./sample-footage /code/sample-footage
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
