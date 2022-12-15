@@ -14,8 +14,6 @@ COPY ./templates /code/templates
 
 COPY ./static /code/static
 
-COPY ./out /code/out
-
 COPY ./sample-footage /code/sample-footage
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80", "--workers", "4"]

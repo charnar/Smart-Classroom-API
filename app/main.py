@@ -22,17 +22,17 @@ templates = Jinja2Templates(directory='templates')
 
 
 @app.get("/")
-def main(request: Request):
+async def main(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/uploader")
-def uploader(request: Request):
+async def uploader(request: Request):
     return templates.TemplateResponse("uploader.html", {"request": request})
 
 
 @app.post("/full-process")
-def full_frame_process(imagePayload: ImagePayload):
+async def full_frame_process(imagePayload: ImagePayload):
     # Read default values from yml file if nothing was given
     if (imagePayload.point1 == "" or imagePayload.point2 == "" or imagePayload.point3 == "" or imagePayload.point4 == "" or imagePayload.area_dim == ""):
         path_yml = 'app/default.yml'
