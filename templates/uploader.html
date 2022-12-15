@@ -1,0 +1,211 @@
+<html>
+  <head>
+    <title>Smart Classroom | Uploader</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='global.css' )}}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='uploader.css' )}}"
+    />
+  </head>
+
+  <body>
+    <div class="navbar">
+      <a href="/">Home</a>
+      <a class="active" href="">Uploader</a>
+    </div>
+
+    <section>
+      <div class="image__container">
+        <div class="image__container-column">
+          <img id="image-display" src="" alt="Original Image" />
+        </div>
+        <div class="image__container-column">
+          <img id="image-display-processed" src="" alt="Processed Image" />
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="two__column__container">
+        <div class="column__container">
+          <form id="upload-form" class="upload__form">
+            <div class="form__group">
+              <label for="file-upload">Upload Image</label>
+              <input
+                type="file"
+                name="file-upload"
+                id="file-upload"
+                accept="image/jpeg"
+                required
+              />
+
+              <h1>Advanced Options</h1>
+            </div>
+            <div class="point__inputs__container">
+              <div class="form__group">
+                <label for="top-left-corner">Top Left Point</label>
+                <input
+                  class="point__input"
+                  id="point4"
+                  type="text"
+                  name="top-left-corner"
+                  placeholder="(672, 91)"
+                />
+              </div>
+
+              <div class="form__group">
+                <label for="top-right-corner">Top Right Point</label>
+                <input
+                  class="point__input"
+                  id="point3"
+                  type="text"
+                  name="top-right-corner"
+                  placeholder="(1265, 107)"
+                />
+              </div>
+
+              <div class="form__group">
+                <label for="bottom-right-corner">Bottom Right Point</label>
+                <input
+                  class="point__input"
+                  id="point2"
+                  type="text"
+                  name="bottom-right-corner"
+                  placeholder="(1874, 840)"
+                />
+              </div>
+
+              <div class="form__group">
+                <label for="bottom-left-corner">Bottom Left Point</label>
+                <input
+                  class="point__input"
+                  id="point1"
+                  type="text"
+                  name="bottom-left-corner"
+                  placeholder="(29, 776)"
+                />
+              </div>
+            </div>
+
+            <div class="form__group">
+              <label for="area-dim">Area Dimensions</label>
+              <input
+                class="point__input"
+                id="area_dim"
+                type="text"
+                name="area-dim"
+                placeholder="(4, 8.8)"
+              />
+            </div>
+
+            <button type="submit">Submit</button>
+          </form>
+        </div>
+
+        <div class="column__container">
+          <div>
+            <img id="image-display-bird" src="" alt="Bird Eye View" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="information__container">
+        <h1>Information</h1>
+        <p>
+          The uploader tool is currently in its early stages, results may not
+          favor all images uploaded and small bugs might occur. The purpose of
+          the uploader tool is to test the performance of our Smart Classroom
+          Detection API in order to improve it in the future.
+        </p>
+      </div>
+
+      <h1>Usage</h1>
+      <h2>1. Upload your image</h2>
+      <h2>
+        2. Enter the 4 points to define the area of interest (If you don't put
+        anything in, the default values will be used)
+      </h2>
+      <h2>
+        3. Enter the physical room dimensions (If you don't put anything in, the
+        default values will be used)
+      </h2>
+      <h2>4. Submit and see the results</h2>
+      <h2>*Please input the information correctly otherwise it won't work</h2>
+    </section>
+  </body>
+
+  <script>
+    function blobToBase64(blob) {
+      return new Promise((resolve, _) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    async function formHandler(e) {
+      try {
+        // Prevent page reloading
+        e.preventDefault();
+
+        // Convert Image to Base64
+        const reader = new FileReader();
+        const blobObj = await fetch(imageDisplay.src).then((r) => r.blob());
+        const base64 = await blobToBase64(blobObj);
+
+        const pointsPayload = Array.from(allPoints).reduce(
+          (arr, point) => ({ ...arr, [point.id]: point.value }),
+          {}
+        );
+
+        // Send Image and Points to Backend
+        const response = await fetch("http://localhost:80/full-process", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            base64: base64.replace(/^data:image\/[a-z]+;base64,/, ""),
+            ...pointsPayload,
+          }),
+        });
+
+        // Consume the response promise
+        const data = await response.json();
+        // Set the image container to the new source
+        processedImageDisplay.src = `data:image/png;base64,${data.frame_base64.slice(
+          2,
+          -1
+        )}`;
+
+        birdImageDisplay.src = `data:image/png;base64,${data.bird_base64.slice(
+          2,
+          -1
+        )}`;
+        // Display the "log" information about the image
+      } catch (err) {
+        console.log(error);
+      }
+    }
+
+    const fileHandler = (e) => {
+      const fileList = e.target.files;
+      imageDisplay.src = URL.createObjectURL(fileList[0]);
+    };
+
+    const imageDisplay = document.getElementById("image-display");
+    const processedImageDisplay = document.getElementById(
+      "image-display-processed"
+    );
+    const birdImageDisplay = document.getElementById("image-display-bird");
+
+    const form = document.getElementById("upload-form");
+    const allPoints = document.querySelectorAll(".point__input");
+    const fileUploader = document.getElementById("file-upload");
+
+    form.addEventListener("submit", formHandler);
+    fileUploader.addEventListener("change", fileHandler);
+  </script>
+</html>

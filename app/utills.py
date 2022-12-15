@@ -2,7 +2,7 @@ import datetime
 import calendar
 import numpy as np
 import cv2
-
+import base64
 
 # Returns the current time in UTC
 def get_utc_time():
@@ -362,3 +362,27 @@ def social_distancing_view(frame, distances_mat, persons, risk_count):
     frame = np.vstack((frame,pad))
             
     return frame
+
+
+def get_image_from_base64(base64_string):
+    image_bytes = base64.b64decode(base64_string)
+    image_array = np.frombuffer(image_bytes, dtype=np.uint8)
+    return cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
+
+def get_base64_from_cv2(buffer):
+    return base64.b64encode(buffer)
+
+
+def tuple_string_to_float_array(tuple_string):
+    tuple_string = tuple_string.replace("(", "")
+    tuple_string = tuple_string.replace(")", "")
+    tuple_string = tuple_string.replace(",", "")
+    return list(map(float, tuple_string.split()))
+
+
+def tuple_string_to_int_array(tuple_string):
+    tuple_string = tuple_string.replace("(", "")
+    tuple_string = tuple_string.replace(")", "")
+    tuple_string = tuple_string.replace(",", "")
+    return list(map(int, tuple_string.split()))

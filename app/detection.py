@@ -24,20 +24,30 @@ class DetectionAPI(object):
     
 
     def __del__(self):
-        self.video.release()
+        if self.video != None:
+            self.video.release()
+
+    def reset_seats(self):
+        for seat in self.seat_matrix:
+            seat.status = 0 
 
 
-    def pre_process(self):
-        success, image = self.video.read()
+    def pre_process(self, image=0, one_time=False):
+        if not one_time:
+            success, image = self.video.read()
+        else:
+            self.height = image.shape[0]
+            self.width= image.shape[1]
+
 
         # Initialize Perspective transform
         src = np.float32(np.array(self.pers_points[:4]))
         dst = np.float32([[0, self.height], [self.width, self.height], [self.width, 0], [0, 0]])
         self.pers_transform = cv2.getPerspectiveTransform(src, dst)
 
-        if success:
-            transformed_first_frame = utills.perspective_transform_frame(image, self.pers_points)
-            self.seat_matrix = get_seat_matrix(transformed_first_frame)
+     
+        transformed_first_frame = utills.perspective_transform_frame(image, self.pers_points)
+        self.seat_matrix = get_seat_matrix(transformed_first_frame)
 
         # Transform seat points 
         utills.get_transformed_seat_points(self.seat_matrix, self.pers_transform)
@@ -70,17 +80,11 @@ class DetectionAPI(object):
         self.scale_w, self.scale_h = utills.get_scale(self.width, self.height, self.bird_width, self.bird_height)
 
 
-    def reset_seats(self):
-        for seat in self.seat_matrix:
-            seat.status = 0 
-                    
+    # Person detection Module
+    def person_detection(self, frame):
+        frameHeight, frameWidth = frame.shape[:2]
 
-    def get_frame(self):
-        success, image = self.video.read()
-        frameHeight, frameWidth = image.shape[:2]
-
-        # Person detection
-        blob = cv2.dnn.blobFromImage(image, SCALE_FACTOR, SPATIAL_SIZE, swapRB=True, crop=False)
+        blob = cv2.dnn.blobFromImage(frame, SCALE_FACTOR, SPATIAL_SIZE, swapRB=True, crop=False)
         self.net_yl.setInput(blob)
         layerOutputs = self.net_yl.forward(self.ln1)
         boxes = []
@@ -114,15 +118,22 @@ class DetectionAPI(object):
             if i in idxs:
                 boxes1.append(boxes[i])
 
+        return boxes1
+    
+
+    def get_frame(self, image=0, one_time=False):
+        if not one_time:
+            success, image = self.video.read() 
+
+        # Apply person detection
+        boxes1 = self.person_detection(image)
 
         persons = []
         for box in boxes1:
-            if success:
-                if box[0] >= 0 and box[1] >= 0:
-                    # Hand detection implementation is not present
-                    hand_boxes = []
-                    persons.append((box, hand_boxes))
-                    
+            if box[0] >= 0 and box[1] >= 0:
+                # Hand detection implementation is not present
+                hand_boxes = []
+                persons.append((box, hand_boxes))
         
          # Transform person points and hand points
         person_points = utills.get_transformed_points(boxes1, self.pers_transform, self.seat_matrix)
