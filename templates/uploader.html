@@ -117,7 +117,12 @@
           The uploader tool is currently in its early stages, results may not
           favor all images uploaded and small bugs might occur. The purpose of
           the uploader tool is to test the performance of our Smart Classroom
-          Detection API in order to improve it in the future.
+          Detection API in order to improve it in the future. As of this current
+          version, the person detection module is working properly and displays
+          the correct processed image. You can send 4 points to define a new
+          area of interest on your photo, it's not quite user-friendly yet. The
+          seat detection module may not work as expected if there are people in
+          the image, so don't expect this to work well.
         </p>
       </div>
 
@@ -161,7 +166,7 @@
         );
 
         // Send Image and Points to Backend
-        const response = await fetch("http://localhost:80/full-process", {
+        const response = await fetch("/full-process", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

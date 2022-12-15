@@ -21,6 +21,22 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory='templates')
 
 
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+manager = ConnectionManager()
+
 @app.get("/")
 async def main(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -83,7 +99,7 @@ async def main_page(request: Request, demo_id):
 @app.websocket("/demo/{footage_id}")
 async def demo_connection(websocket: WebSocket, footage_id):
     try:
-        await websocket.accept()      
+        await manager.connect(websocket)    
         # Connect to MongoDB
         my_database = client["demo_db"]
         my_collection = my_database[f"{footage_id}"]
@@ -145,8 +161,9 @@ async def demo_connection(websocket: WebSocket, footage_id):
 
                 previous_time = current_time
                 count = 0
-                await websocket.send_text(json.dumps(sent_payload))
+                await manager.send_message(json.dumps(sent_payload), websocket)
 
     except WebSocketDisconnect:
-        print("Something went wrong...")
+        manager.disconnect(websocket)
+        print("A user has disconnected")
 
