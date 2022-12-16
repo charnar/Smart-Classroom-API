@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.encoders import jsonable_encoder
 from app.detection import DetectionAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.configs import FRAME_TIME_DELAY, DATABASE_URL
 import app.utills as utills
 import pymongo
@@ -14,8 +15,18 @@ import json
 from datetime import datetime
 from app.schemas import ImagePayload
 
+origins = ["*"]
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 client = pymongo.MongoClient(DATABASE_URL)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory='templates')
