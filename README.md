@@ -1,5 +1,6 @@
-![Thammasat University Smart Classroom Banner](banner.png "Thammasat University Smart Classroom Banner")
-
+<div class='display: flex; justify-content: center; align-items: center;'>
+    <img src='banner.png'>
+</div>
 ## Project Information
 
 ### Publication:
