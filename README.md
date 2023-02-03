@@ -1,3 +1,5 @@
+![Thammasat University Smart Classroom Banner](banner.png "Thammasat University Smart Classroom Banner")
+
 ## Project Information
 
 ### Publication:
