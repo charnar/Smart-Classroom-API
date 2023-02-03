@@ -6,7 +6,7 @@
 
 ## Project Information
 
-Project: **_A camera-based near-real time person distance tracking in classrooms_**.
+Project: **_A camera-based near-real time person distance tracking in classrooms_**. Under the supervision of [Dr. Somrudee Deepaisarn](https://www.siit.tu.ac.th/personnel.php?id=252), School of Information, Computer, and Communication Technology, SIIT, Thammasat University and [Prof. Dr. Virach Sornlertlamvanich](https://www.virach.com/), Faculty of Engineering, Thammasat University.
 
 ### Publication:
 
