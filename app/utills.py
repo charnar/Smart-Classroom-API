@@ -21,7 +21,7 @@ def get_distances(boxes1, bottom_points, distance_w, distance_h):
         for j in range(len(bottom_points)):
             if i != j:
                 dist = cal_dis(bottom_points[i], bottom_points[j], distance_w, distance_h)
-                #dist = int((dis*180)/distance)
+          
                 if dist <= 150:
                     closeness = 0
                     distance_mat.append([bottom_points[i], bottom_points[j], closeness, dist])
@@ -237,7 +237,6 @@ def get_bird_eye_view(frame, distances_mat, bottom_points, scale_w, scale_h, ris
         temp = "({:.2f},{:.2f})".format(phy_h, phy_w)
         s.physical_coords = (phy_h, phy_w)
         blank_image = cv2.circle(blank_image, (int(center_y * scale_h), int(center_x * scale_w)), 5, black, 10)
-        # blank_image = cv2.putText(blank_image, temp, (int(center_y * scale_h), int(center_x * scale_w)),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (100, 100, 0), 2)
     
     
     for i in range(len(distances_mat)):
@@ -322,7 +321,6 @@ def social_distancing_view(frame, distances_mat, persons, risk_count):
             x1_length = top_left_x1 + w1
             y1_length = top_left_y1 + h1
 
-            # frame = cv2.circle(frame, (center_x1, center_y1), 10, pink, thickness=-1)
             frame = cv2.rectangle(frame,(top_left_x1, top_left_y1),(x1_length, y1_length),pink,2)
 
 

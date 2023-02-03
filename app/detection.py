@@ -69,7 +69,7 @@ class DetectionAPI(object):
         #Find suitable size of bird eye view window
         while True:
             self.bird_height = int(sc_h * self.bird_width / sc_w)
-            # bird_height = int(sc_w*bird_width/sc_h)
+            
             if self.bird_width * self.bird_height < 200000:
                 self.bird_width = self.bird_width + 40
             elif self.bird_width * self.bird_height > 360000:

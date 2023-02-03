@@ -21,36 +21,36 @@ def display_seats(frame, seat_arr):
         cv2.putText(frame, str((seat.row, seat.col)), (seat.position[0], seat.position[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2)
 
 
-def arrange_seats(arr):    # A function to initialize the seating of the classroom
+ # A function to initialize the seating of the classroom
+def arrange_seats(arr):   
     returned_arr = []
-    n = 1   #Front most row
+    n = 1   
     while (len(arr) != 0):
         temp_arr = []
-        max_seat = max(arr, key=lambda s: s.position[1])    # Find the front most seat from the current seat contour 
-        arr.remove(max_seat)                                # Remove the front most seat
-        temp_arr.append(max_seat)                           # Add it to a temporary array
+        max_seat = max(arr, key=lambda s: s.position[1])    
+        arr.remove(max_seat)                               
+        temp_arr.append(max_seat)                          
         
-        for selected_seat in arr:   # Loop through all the seat contours list
-            # MAGIC RIGHT HERE
+        for selected_seat in arr:   
             if ((selected_seat.center[1] >= max_seat.position[1] - (0.4 * max_seat.height)) and (selected_seat.center[1] <= max_seat.position[1] + (0.9 * max_seat.height))):
                 temp_arr.append(selected_seat)
-                # print(selected_seat.position)
             
-        arr = [i for i in arr if i not in temp_arr] # Remove elements from the main array that are the same in the temporary array
+            
+        arr = [i for i in arr if i not in temp_arr] 
 
-        temp_arr = sorted(temp_arr, key = lambda s: s.position[0], reverse = True)  # Sort the temporary from rightmost seat to leftmost
+        temp_arr = sorted(temp_arr, key = lambda s: s.position[0], reverse = True)  
         
         m = 1
-        for seat in temp_arr:   # Loop through the temporary array
-            seat.row = n        # Set the row of the current seat
-            seat.col = m        # Set the column of the current seat
-            m = m + 1           # Increment the column by 1
+        for seat in temp_arr:   
+            seat.row = n        
+            seat.col = m       
+            m = m + 1         
 
-        returned_arr += temp_arr    # Add the temporary array to the returned array
-        n = n + 1                   # Increment the row by 1
+        returned_arr += temp_arr    
+        n = n + 1                 
 
-    col_lines = get_regression_lines(returned_arr) # vertical (column)
-    row_lines = get_regression_lines(returned_arr, True) # horizontal lines (row)
+    col_lines = get_regression_lines(returned_arr) 
+    row_lines = get_regression_lines(returned_arr, True) 
 
     return returned_arr  
 
@@ -101,13 +101,12 @@ def get_regression_lines(seats, horizontal=False):
 
 
 
-def get_seat_contour(frame, contours): # Find the seat contours
+def get_seat_contour(frame, contours): 
     seat_contours = []
     for contour in contours:
         (x, y, w, h) = cv2.boundingRect(contour)
         area = cv2.contourArea(contour)
 
-        #print(x, y, w, h, "Area:", area) # Information about each contour
         if (area >= 200 and w >= 100 and y < 1000):
             seat_contours.append(Seat(x, y, w, h, area))
     
