@@ -10,7 +10,7 @@ Project: **_A camera-based near-real time person distance tracking in classrooms
 
 ### Publication:
 
-- "Camera-Based Log System for Human Physical Distance Tracking in Classroom", [View on IEEE](https://ieeexplore.ieee.org/document/9980055)
+- "Camera-Based Log System for Human Physical Distance Tracking in Classroom", 2022 Asia-Pacific Signal and Information Processing Association Annual Summit and Conference (APSIPA ASC), [View on IEEE](https://ieeexplore.ieee.org/document/9980055)
 
 ## Setup
 
